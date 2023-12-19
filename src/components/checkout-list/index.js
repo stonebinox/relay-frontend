@@ -59,15 +59,22 @@ export const CheckoutList = ({ item, setItem }) => {
 
       if (target === undefined) return;
 
-      if (target.quantity > minQty) {
-        const trigger = parseInt(target.quantity % (minQty + 1), 10);
+      const totalQuantity = items.filter(
+        (savedItem) => savedItem.sku === sku
+      ).length;
+
+      if (totalQuantity > minQty) {
+        const trigger = parseInt(totalQuantity % (minQty + 1), 10);
 
         if (trigger === 0) {
           const latestItem = items[items.length - 1];
-          latestItem.price = 0.0;
-          const itemsCopy = items.slice();
-          itemsCopy[itemsCopy.length - 1] = latestItem;
-          setItems(itemsCopy);
+
+          if (latestItem.price !== 0.0) {
+            latestItem.price = 0.0;
+            const itemsCopy = items.slice();
+            itemsCopy[itemsCopy.length - 1] = latestItem;
+            setItems(itemsCopy);
+          }
         }
       }
 
@@ -202,7 +209,14 @@ export const CheckoutList = ({ item, setItem }) => {
             <TableHeading>Total</TableHeading>
           </tr>
         </thead>
-        <tbody>{listItems()}</tbody>
+        <tbody>
+          {listItems()}
+          <tr>
+            <td colSpan={4}>
+              <hr />
+            </td>
+          </tr>
+        </tbody>
         <tfoot>
           <tr>
             <TableHeading>Total</TableHeading>
