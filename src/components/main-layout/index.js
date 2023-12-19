@@ -11,7 +11,7 @@ export const MainLayout = () => {
   return (
     <LayoutContainer>
       <Scan setItem={setItem} />
-      <CheckoutList item={item} />
+      <CheckoutList setItem={setItem} item={item} />
     </LayoutContainer>
   );
 };

@@ -3,9 +3,54 @@ import React, { useState, useEffect } from "react";
 
 import { CheckoutContainer, ItemData, TableHeading } from "./index.styles";
 
-export const CheckoutList = ({ item }) => {
+export const CheckoutList = ({ item, setItem }) => {
   const [items, setItems] = useState([]);
-  console.log(item);
+  const [parsedItems, setParsedItems] = useState([]);
+
+  const checkDiscountRules = () => {
+    const { discountRules = null, sku } = item;
+
+    if (!discountRules) return;
+
+    const { type } = discountRules;
+
+    if (type === "item") {
+      const { minQty, items: discountItems = [] } = discountRules;
+      const target = parsedItems.find((parsedItem) => parsedItem.sku === sku);
+
+      if (target === undefined) return;
+
+      if (target.quantity > minQty) {
+        const promises = discountItems.map((discount) =>
+          fetch(`http://localhost:3000/scan?sku=${discount.itemSku}`)
+        );
+
+        Promise.all(promises)
+          .then((responses) =>
+            Promise.all(responses.map((response) => response.json()))
+          )
+          .then((data) => {
+            if (!data) return;
+
+            data.forEach((fetchedData) => {
+              if (fetchedData.success === false) return;
+
+              const { data: fetchedItem } = fetchedData;
+              const { sku: fetchedSku } = fetchedItem;
+              const discountItem = discountItems.find(
+                (discount) => discount.itemSku === fetchedSku
+              );
+
+              if (discountItem === undefined) return; // this will never happen; fail-safe though
+
+              const { price: discountPrice } = discountItem;
+              fetchedItem.price = discountPrice;
+              setItem(fetchedItem);
+            });
+          });
+      }
+    }
+  };
 
   const addItem = () => {
     const itemsCopy = items.slice();
@@ -14,28 +59,26 @@ export const CheckoutList = ({ item }) => {
   };
 
   const parseItems = () => {
-    const parsedItems = [];
+    const newParsedItems = [];
 
     items.forEach((savedItem, i) => {
-      const position = parsedItems.findIndex(
+      const position = newParsedItems.findIndex(
         (parsedItem) => parsedItem.sku === savedItem.sku
       );
 
       if (position === -1) {
-        parsedItems.push({ ...savedItem, quantity: 1 });
+        newParsedItems.push({ ...savedItem, quantity: 1 });
       } else {
-        const parsedItem = parsedItems[position];
+        const parsedItem = newParsedItems[position];
         parsedItem.quantity += 1;
-        parsedItems[position] = parsedItem;
+        newParsedItems[position] = parsedItem;
       }
     });
 
-    return parsedItems;
+    setParsedItems(newParsedItems);
   };
 
   const listItems = () => {
-    const parsedItems = parseItems();
-
     return parsedItems.map((storedItem, index) => (
       <tr key={index}>
         <ItemData>{storedItem.name}</ItemData>
@@ -54,8 +97,21 @@ export const CheckoutList = ({ item }) => {
     if (item === null) return;
 
     addItem();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item]);
+
+  useEffect(() => {
+    parseItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
+
+  useEffect(() => {
+    if (item === null) return;
+
+    checkDiscountRules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsedItems]);
 
   return (
     <CheckoutContainer>

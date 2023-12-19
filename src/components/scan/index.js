@@ -32,7 +32,8 @@ export const Scan = ({ setItem }) => {
             setItem(item);
           }
         })
-        .catch((e) => console.error(e));
+        .catch((e) => console.error(e))
+        .finally(() => setSku(""));
     }
   };
 
@@ -45,6 +46,7 @@ export const Scan = ({ setItem }) => {
           placeholder="Enter a SKU"
           onChange={(e) => setSku(e.currentTarget.value)}
           onKeyUp={handleSubmit}
+          value={sku}
         />
       </ScanContainer>
       <ScanSubtextContainer>
