@@ -49,6 +49,59 @@ export const CheckoutList = ({ item, setItem }) => {
             });
           });
       }
+
+      return;
+    }
+
+    if (type === "qty") {
+      const { minQty } = discountRules;
+      const target = parsedItems.find((parsedItem) => parsedItem.sku === sku);
+
+      if (target === undefined) return;
+
+      if (target.quantity > minQty) {
+        const trigger = parseInt(target.quantity % (minQty + 1), 10);
+
+        if (trigger === 0) {
+          const latestItem = items[items.length - 1];
+          latestItem.price = 0.0;
+          const itemsCopy = items.slice();
+          itemsCopy[itemsCopy.length - 1] = latestItem;
+          setItems(itemsCopy);
+        }
+      }
+
+      return;
+    }
+
+    if (type === "price") {
+      const { minQty } = discountRules;
+      const target = parsedItems.find((parsedItem) => parsedItem.sku === sku);
+
+      if (target === undefined) return;
+
+      if (target.quantity > minQty) {
+        const { discountPricePerItem } = discountRules;
+        let changed = false;
+        const itemsCopy = items.map((savedItem) => {
+          if (
+            savedItem.sku === sku &&
+            savedItem.price !== discountPricePerItem
+          ) {
+            savedItem.price = discountPricePerItem;
+            changed = true;
+          }
+
+          return savedItem;
+        });
+
+        if (changed) {
+          // to prevent infinite loops
+          setItems(itemsCopy);
+        }
+      }
+
+      return;
     }
   };
 
@@ -63,7 +116,9 @@ export const CheckoutList = ({ item, setItem }) => {
 
     items.forEach((savedItem, i) => {
       const position = newParsedItems.findIndex(
-        (parsedItem) => parsedItem.sku === savedItem.sku
+        (parsedItem) =>
+          parsedItem.sku === savedItem.sku &&
+          savedItem.price === parsedItem.price
       );
 
       if (position === -1) {
@@ -87,10 +142,33 @@ export const CheckoutList = ({ item, setItem }) => {
           {storedItem.currency} {storedItem.price}
         </ItemData>
         <ItemData>
-          {storedItem.currency} {storedItem.quantity * storedItem.price}
+          {storedItem.currency}{" "}
+          {parseFloat(storedItem.quantity * storedItem.price).toFixed(2)}
         </ItemData>
       </tr>
     ));
+  };
+
+  const getTotalQuantity = () => {
+    let total = 0;
+
+    for (let i = 0; i < parsedItems.length; i++) {
+      const parsed = parsedItems[i];
+      total = total + parsed.quantity;
+    }
+
+    return total;
+  };
+
+  const getTotalInvoiceValue = () => {
+    let total = 0.0;
+
+    for (let i = 0; i < parsedItems.length; i++) {
+      const parsed = parsedItems[i];
+      total = total + parsed.price * parsed.quantity;
+    }
+
+    return parseFloat(total).toFixed(2);
   };
 
   useEffect(() => {
@@ -125,6 +203,14 @@ export const CheckoutList = ({ item, setItem }) => {
           </tr>
         </thead>
         <tbody>{listItems()}</tbody>
+        <tfoot>
+          <tr>
+            <TableHeading>Total</TableHeading>
+            <TableHeading>{getTotalQuantity()}</TableHeading>
+            <TableHeading></TableHeading>
+            <TableHeading>{getTotalInvoiceValue()}</TableHeading>
+          </tr>
+        </tfoot>
       </table>
     </CheckoutContainer>
   );
