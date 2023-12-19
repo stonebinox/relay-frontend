@@ -9,7 +9,7 @@ import {
   ScanSubtextContainer,
 } from "./index.styles";
 
-export const Scan = () => {
+export const Scan = ({ setItem }) => {
   const [sku, setSku] = useState("");
   const [error, setError] = useState("");
 
@@ -26,9 +26,10 @@ export const Scan = () => {
           if (success === false) {
             const { message } = data;
             setError(message);
+            setItem(null);
           } else {
             const { data: item } = data;
-            console.log("datax", data);
+            setItem(item);
           }
         })
         .catch((e) => console.error(e));

@@ -1,12 +1,17 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 
 import { LayoutContainer } from "./index.styles";
 import { Scan } from "../scan";
 import { CheckoutList } from "../checkout-list";
 
-export const MainLayout = () => (
-  <LayoutContainer>
-    <Scan />
-    <CheckoutList />
-  </LayoutContainer>
-);
+export const MainLayout = () => {
+  const [item, setItem] = useState(null);
+
+  return (
+    <LayoutContainer>
+      <Scan setItem={setItem} />
+      <CheckoutList item={item} />
+    </LayoutContainer>
+  );
+};

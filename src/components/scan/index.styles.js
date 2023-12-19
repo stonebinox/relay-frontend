@@ -7,6 +7,7 @@ import {
   DOUBLE_BASE_SPACING,
   BASE_SPACING,
   QUARTER_BASE_SPACING,
+  customSpacing,
 } from "@/utils/spacing";
 
 export const ScanContainer = styled.div`
@@ -26,7 +27,7 @@ export const ScanContainer = styled.div`
 
 export const ScanInput = styled.input`
   width: 100%;
-  height: ${DOUBLE_BASE_SPACING};
+  height: ${customSpacing(40)};
   background: rgba(255, 255, 255, 0);
   border: 0;
   font-size: ${DOUBLE_BASE_SPACING};
