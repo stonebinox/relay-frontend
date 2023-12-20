@@ -199,7 +199,7 @@ export const CheckoutList = ({ item, setItem }) => {
   }, [parsedItems]);
 
   return (
-    <CheckoutContainer>
+    <CheckoutContainer data-testid="checkout">
       <table width="100%" border="0">
         <thead>
           <tr>

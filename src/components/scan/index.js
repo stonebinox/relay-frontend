@@ -38,7 +38,7 @@ export const Scan = ({ setItem }) => {
   };
 
   return (
-    <div>
+    <div data-testid="scan">
       <ScanContainer>
         <ScanInput
           type="text"
@@ -47,6 +47,7 @@ export const Scan = ({ setItem }) => {
           onChange={(e) => setSku(e.currentTarget.value)}
           onKeyUp={handleSubmit}
           value={sku}
+          data-testid="sku"
         />
       </ScanContainer>
       <ScanSubtextContainer>
