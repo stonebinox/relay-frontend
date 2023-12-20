@@ -95,7 +95,9 @@ export const CheckoutList = ({ item, setItem }) => {
             savedItem.sku === sku &&
             savedItem.price !== discountPricePerItem
           ) {
+            savedItem.originalPrice = savedItem.price;
             savedItem.price = discountPricePerItem;
+
             changed = true;
           }
 
@@ -104,6 +106,25 @@ export const CheckoutList = ({ item, setItem }) => {
 
         if (changed) {
           // to prevent infinite loops
+          setItems(itemsCopy);
+        }
+      } else {
+        let changed = false;
+
+        const itemsCopy = items.map((savedItem) => {
+          if (
+            savedItem.originalPrice &&
+            savedItem.originalPrice !== savedItem.price
+          ) {
+            changed = true;
+            savedItem.price = savedItem.originalPrice;
+            delete savedItem.originalPrice;
+          }
+
+          return savedItem;
+        });
+
+        if (changed) {
           setItems(itemsCopy);
         }
       }
@@ -140,6 +161,33 @@ export const CheckoutList = ({ item, setItem }) => {
     setParsedItems(newParsedItems);
   };
 
+  const removeItem = (index) => {
+    const parsedCopy = parsedItems.slice();
+    const itemsCopy = items.slice();
+    const parsedItem = parsedCopy[index];
+    const { sku } = parsedItem;
+
+    if (parsedItem.quantity > 1) {
+      const reversedItems = itemsCopy.reverse();
+      const position = reversedItems.findIndex(
+        (reversedItem) => reversedItem.sku === sku
+      );
+
+      if (position === -1) return;
+
+      reversedItems.splice(position, 1);
+      setItems(reversedItems.reverse());
+    } else {
+      const position = itemsCopy.findIndex((itemCopy) => itemCopy.sku === sku);
+
+      if (position === -1) return;
+
+      itemsCopy.splice(position, 1);
+
+      setItems(itemsCopy);
+    }
+  };
+
   const listItems = () => {
     return parsedItems.map((storedItem, index) => (
       <tr key={index}>
@@ -151,6 +199,11 @@ export const CheckoutList = ({ item, setItem }) => {
         <ItemData>
           {storedItem.currency}{" "}
           {parseFloat(storedItem.quantity * storedItem.price).toFixed(2)}
+        </ItemData>
+        <ItemData>
+          <a href="#" onClick={() => removeItem(index)}>
+            Remove
+          </a>
         </ItemData>
       </tr>
     ));
@@ -207,12 +260,13 @@ export const CheckoutList = ({ item, setItem }) => {
             <TableHeading>Qty</TableHeading>
             <TableHeading>Rate</TableHeading>
             <TableHeading>Total</TableHeading>
+            <TableHeading>Actions</TableHeading>
           </tr>
         </thead>
         <tbody>
           {listItems()}
           <tr>
-            <td colSpan={4}>
+            <td colSpan={5}>
               <hr />
             </td>
           </tr>
@@ -223,6 +277,7 @@ export const CheckoutList = ({ item, setItem }) => {
             <TableHeading>{getTotalQuantity()}</TableHeading>
             <TableHeading></TableHeading>
             <TableHeading>{getTotalInvoiceValue()}</TableHeading>
+            <TableHeading></TableHeading>
           </tr>
         </tfoot>
       </table>

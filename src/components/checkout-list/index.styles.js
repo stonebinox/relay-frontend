@@ -28,4 +28,8 @@ export const TableHeading = styled.td`
 
 export const ItemData = styled.td`
   color: ${colors.black};
+
+  a {
+    color: ${colors.amber};
+  }
 `;
