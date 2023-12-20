@@ -45,11 +45,11 @@ export const CheckoutList = ({ item, setItem }) => {
 
               const { price: discountPrice } = discountItem;
               fetchedItem.price = discountPrice;
+              fetchedItem.parent = discountItem.parent;
               setItem(fetchedItem);
             });
           });
       }
-
       return;
     }
 
@@ -161,6 +161,13 @@ export const CheckoutList = ({ item, setItem }) => {
     setParsedItems(newParsedItems);
   };
 
+  /**
+   * Removes an item from the checkout list.
+   *
+   * @param {number} index
+   * @todo This function is done; some render behaviour has to be changed
+   * @returns
+   */
   const removeItem = (index) => {
     const parsedCopy = parsedItems.slice();
     const itemsCopy = items.slice();
@@ -200,11 +207,11 @@ export const CheckoutList = ({ item, setItem }) => {
           {storedItem.currency}{" "}
           {parseFloat(storedItem.quantity * storedItem.price).toFixed(2)}
         </ItemData>
-        <ItemData>
+        {/* TODO: <ItemData>
           <a href="#" onClick={() => removeItem(index)}>
             Remove
           </a>
-        </ItemData>
+    </ItemData> */}
       </tr>
     ));
   };
@@ -260,13 +267,13 @@ export const CheckoutList = ({ item, setItem }) => {
             <TableHeading>Qty</TableHeading>
             <TableHeading>Rate</TableHeading>
             <TableHeading>Total</TableHeading>
-            <TableHeading>Actions</TableHeading>
+            {/* TODO: <TableHeading>Actions</TableHeading> */}
           </tr>
         </thead>
         <tbody>
           {listItems()}
           <tr>
-            <td colSpan={5}>
+            <td colSpan={4}>
               <hr />
             </td>
           </tr>
@@ -277,7 +284,6 @@ export const CheckoutList = ({ item, setItem }) => {
             <TableHeading>{getTotalQuantity()}</TableHeading>
             <TableHeading></TableHeading>
             <TableHeading>{getTotalInvoiceValue()}</TableHeading>
-            <TableHeading></TableHeading>
           </tr>
         </tfoot>
       </table>
